@@ -7,7 +7,7 @@ with open(path.join(this_directory, 'README.md'), encoding='utf-8') as f:
 
 
 setuptools.setup(name='py2plpy',
-                version='0.2.1',
+                version='0.2.4',
                 description='Convert python function to postgresql plpython functions',
                 long_description=long_description,
                 long_description_content_type='text/markdown',

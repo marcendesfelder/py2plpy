@@ -24,6 +24,16 @@ types = {
     bool : 'BOOLEAN'
 }
 
+def convertType(t):
+    try:
+        return types[t]
+    except KeyError:
+        pass
+    try:
+        if t.__origin__ == list:
+            return types[t.__args__[0]]+'[]'
+    except:
+        return str(t)
 
 def getBody(f):
     body = re.sub(r'^([^\n\(]|\([^\)]*\))+\n', '', inspect.getsource(f)).rstrip()
@@ -72,8 +82,8 @@ def parseDoc(f):
 def transformFunc(f, schema = 'public'):
     d = {}
     s = inspect.signature(f)
-    d['arguments'] = ',\n'.join([param.name+' '+types[param.annotation] for param in s.parameters.values()])
-    d['returntype'] = types[s.return_annotation]
+    d['arguments'] = ',\n'.join([param.name+' '+convertType(param.annotation) for param in s.parameters.values()])
+    d['returntype'] = convertType(s.return_annotation)
     d['body'] = getBody(f)
     d['name'] = f.__name__
     d['properties'] = parseDoc(f)
