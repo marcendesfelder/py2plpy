@@ -1,0 +1,34 @@
+start: _expr*
+
+_expr: strictness
+     | volatility
+     | parallelism
+     | security
+     | cost
+     | rows
+     | leakyness
+
+strictness: ("RETURNS" "NULL" "ON" "NULL" "INPUT" | "STRICT")   -> strict
+          | "CALLED" "ON" "NULL" "INPUT"                        -> nonstrict
+
+volatility: "VOLATILE"                                          -> volatile
+          | "IMMUTABLE"                                         -> immutable
+          | "STABLE"                                            -> stable
+    
+parallelism: "PARALLEL" "SAFE"                                  -> parasafe
+           | "PARALLEL" "UNSAFE"                                -> paraunsafe
+           | "PARALLEL" "RESTRICTED"                            -> pararestricted
+
+security: "EXTERNAL"? "SECURITY" "INVOKER"                      -> invoker
+        | "EXTERNAL"? "SECURITY" "DEFINIER"                     -> definer
+
+leakyness: "LEAKPROOF"                                          -> leakproof
+         | "NOT" "LEAKPROOF"                                    -> nonleakproof    
+
+cost: "COST" NUMBER
+
+rows: "ROWS" NUMBER
+
+
+%ignore /[\t \f\n]+/
+%import common.NUMBER
