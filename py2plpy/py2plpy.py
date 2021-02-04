@@ -5,7 +5,7 @@ import importlib
 import re
 from lark import Lark
 
-l = Lark.open('py2plpy/grammar.lark')
+l = Lark.open(os.path.dirname(os.path.realpath(__file__))+'/grammar.lark')
 
 p = '''CREATE OR REPLACE FUNCTION {schema}.{name} (
 {arguments})
@@ -15,7 +15,6 @@ LANGUAGE 'plpython3u'
 AS $BODY$
 {body}
 $BODY$;'''
-
 
 types = {
     int : 'INTEGER',
