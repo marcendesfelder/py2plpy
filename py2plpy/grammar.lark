@@ -7,6 +7,7 @@ _expr: strictness
      | cost
      | rows
      | leakyness
+     | transform
 
 strictness: ("RETURNS" "NULL" "ON" "NULL" "INPUT" | "STRICT")   -> strict
           | "CALLED" "ON" "NULL" "INPUT"                        -> nonstrict
@@ -25,10 +26,13 @@ security: "EXTERNAL"? "SECURITY" "INVOKER"                      -> invoker
 leakyness: "LEAKPROOF"                                          -> leakproof
          | "NOT" "LEAKPROOF"                                    -> nonleakproof    
 
+transform: "TRANSFORM" ("FOR" "TYPE" TYPE)?
+
 cost: "COST" NUMBER
 
 rows: "ROWS" NUMBER
 
+TYPE: /[a-zA-Z]+/
 
 %ignore /[\t \f\n]+/
 %import common.NUMBER

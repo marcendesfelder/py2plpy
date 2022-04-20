@@ -32,7 +32,7 @@ def convertType(t):
         if t.__origin__ == list:
             return types[t.__args__[0]]+'[]'
     except:
-        return str(t)
+        return t.__name__
 
 def getBody(f):
     body = re.sub(r'^([^\n\(]|\([^\)]*\))+\n', '', inspect.getsource(f)).rstrip()
@@ -75,6 +75,8 @@ def parseDoc(f):
                 properties['cost'] = 'COST '+s.children[0]
             elif s.data == 'rows':
                 properties['rows'] = 'ROWS '+s.children[0]
+            elif s.data == 'transform':
+                properties['transform'] = 'TRANSFORM' + (' FOR TYPE '+s.children[0] if len(s.children) else '')
         return '\n'.join(properties.values())
 
 
