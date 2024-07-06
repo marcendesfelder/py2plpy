@@ -2,12 +2,12 @@
 
 pl2ply is a simple python package that makes it easy to write PostgreSQL PL/Python functions as native python code and then convert them to SQL. 
 
-It consits of five elements:
+It consists of five components:
 - a `transform` function that reads a python file and returns PL/Python code for all functions at the root of the file
 - a `sql_properties` decorator that adds SQL-specific information to a python function
 - predefined types `Out`, `In`, `InOut`, `SetOf` and `Record`
 - a dummy `plpy` object that mimics the corresponding Pl/Python object
-- the `pl2plpy`command line tool
+- the `py2plpy`command line tool
 
 ## Usage
 
