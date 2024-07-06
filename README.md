@@ -7,38 +7,44 @@ It consits of five elements:
 - a `sql_properties` decorator that adds SQL-specific information to a python function
 - predefined types `Out`, `In`, `InOut`, `SetOf` and `Record`
 - a dummy `plpy` object that mimics the corresponding Pl/Python object
-- a `pl2plpy`command line tool
+- the `pl2plpy`command line tool
 
 ## Usage
 
-    # fruit.py
+```python
+# fruit.py
 
-    from py2plpy import sql_properties, Out, SetOf, Record, plpy
+from py2plpy import sql_properties, Out, SetOf, Record, plpy
 
-    @sql_properties(strict=True)
-    def find_fruit(string:str, fruit_no:Out[int], fruit:Out[str]) -> SetOf[Record]:
+@sql_properties(strict=True)
+def find_fruit(string:str, fruit_no:Out[int], fruit:Out[str]) -> SetOf[Record]:
+    import re
+    
+    plpy.info('Searching for fruit...')
+    for i, m in enumerate(re.findall(r'apple|pear|banana', string)):
+        yield i, m
+```
+
+```
+py2plpy fruit.py fruit.sql
+```
+
+```sql
+-- fruit.sql
+
+CREATE OR REPLACE FUNCTION find_fruit (
+    string TEXT,
+    OUT fruit_no INTEGER,
+    OUT fruit TEXT)
+    RETURNS SETOF RECORD
+    STRICT
+    LANGUAGE PLPYTHON3U
+    AS $BODY$
+    
         import re
         
         plpy.info('Searching for fruit...')
         for i, m in enumerate(re.findall(r'apple|pear|banana', string)):
             yield i, m
-
-`py2plyp fruit.py fruit.sql`
-
-    -- fruit.sql
-    
-    CREATE OR REPLACE FUNCTION find_fruit (
-        string TEXT,
-        OUT fruit_no INTEGER,
-        OUT fruit TEXT)
-        RETURNS SETOF RECORD
-        STRICT
-        LANGUAGE PLPYTHON3U
-        AS $BODY$
-        
-            import re
-            
-            plpy.info('Searching for fruit...')
-            for i, m in enumerate(re.findall(r'apple|pear|banana', string)):
-                yield i, m
-        $BODY$;
+    $BODY$;
+```
