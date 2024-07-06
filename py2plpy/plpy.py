@@ -26,4 +26,11 @@ class Plpy:
     def rollback(self):
         pass
 
+    def quote_literal(self, string:str) -> str:
+        return ''
+    def quote_nullable(self, string:str) -> str:
+        return ''
+    def quote_ident(self, string:str) -> str:
+        return ''
+
 plpy = Plpy()
