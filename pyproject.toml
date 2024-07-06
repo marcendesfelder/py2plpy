@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "py2plpy"
+version = "0.2.19"
+description = "Convert python function to PostgreSQL Pl/Python functions"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "Marc Endesfelder", email = "marc@endesfelder.de"}]
+license = {text = "MIT"}
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Programming Language :: PL/SQL",
+    "Topic :: Database :: Database Engines/Servers",
+    "Topic :: Database",
+    "Topic :: Software Development :: Code Generators"
+]
+dependencies=[]
+
+[project.scripts]
+"py2plpy" = "py2plpy.command_line:main"
