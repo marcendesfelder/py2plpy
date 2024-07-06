@@ -3,16 +3,11 @@ import os
 import sys
 import importlib
 import re
-from lark import Lark
 from typing import Generic, TypeVar, List
 try:
     from typing import Literal
 except ImportError:
     from typing_extensions import Literal
-
-
-
-l = Lark.open(os.path.dirname(os.path.realpath(__file__))+'/grammar.lark')
 
 
 class Modifier:
@@ -33,10 +28,8 @@ class Record:
     pass
 
 
-p = '''CREATE OR REPLACE FUNCTION {schema}.{name} (
+p = '''CREATE OR REPLACE {routine} {schema}{name} (
 {arguments})
-{returntype}
-LANGUAGE 'plpython3u' 
 {properties}
 AS $BODY$
 {body}
@@ -108,11 +101,12 @@ def sql_properties(
         leakproof:bool = None, 
         cost:int = None,
         rows:int = None,
-        transform:List[type]=[]):
+        transform:List[type]=[],
+        procedure:bool = False):
     properties = []
     if strict == True:
         properties.append('STRICT')
-    elif strict == False:
+    elif strict == False and not procedure:
         properties.append('CALLED ON NULL INPUT')
     if volatility:
         properties.append(volatility.upper())
@@ -130,24 +124,29 @@ def sql_properties(
         properties.append('TRANSFORM FOR TYPE '+', FOR TYPE '.join([convertType_(t) for t in transform]))
 
     def f(func):
-        func._sqlProperties = '\n'.join(properties)
+        func._sqlProperties = properties
+        func._sqlProcedure = procedure
         return func
     
     return f
 
 
-def transformFunc(f, schema = 'public'):
+def transformFunc(f, schema = None):
     d = {}
     s = inspect.signature(f)
     d['arguments'] = ',\n'.join([param(p.name, p.annotation) for p in s.parameters.values()])
-    d['returntype'] = 'RETURNS ' + returntype(s.return_annotation) if s.return_annotation != inspect.Signature.empty else ''
     d['body'] = getBody(f)
     d['name'] = f.__name__
+    properties = []
+    if s.return_annotation != inspect.Signature.empty:
+        properties.append('RETURNS ' + returntype(s.return_annotation))
     try:
-        d['properties'] = f._sqlProperties
+        properties += f._sqlProperties
+        d['routine'] = 'PROCEDURE' if f._sqlProcedure else 'FUNCTION'
     except AttributeError:
-        d['properties'] = ''
-    d['schema'] = schema
+        d['routine'] = 'FUNCTION'
+    d['properties'] = '\n'.join(properties+['LANGUAGE PLPYTHON3U'])
+    d['schema'] = schema+'.' if schema is not None else ''
     return p.format_map(d) 
     
 
@@ -160,6 +159,6 @@ def transform(path):
     res = ''
     for _, f in inspect.getmembers(m, inspect.isroutine):
         if f.__module__ == m.__name__:
-            res += transformFunc(f)
+            res += transformFunc(f) + '\n\n'
 
     return res.replace('\n', '\n    ')
