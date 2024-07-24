@@ -3,29 +3,8 @@ import os
 import sys
 import importlib
 import re
-from typing import Generic, TypeVar, List
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
-
-class Modifier:
-    def __init__(self, type):
-        self.type = type
-
-T = TypeVar('T')
-class Out(Generic[T], Modifier):
-    pass
-class In(Generic[T], Modifier):
-    pass
-class InOut(Generic[T], Modifier):
-    pass
-class SetOf(Generic[T], Modifier):
-    pass
-
-class Record:
-    pass
+from typing import List, Literal, Optional, Tuple
+from decimal import Decimal
 
 
 p = '''CREATE OR REPLACE {routine} {schema}{name} (
@@ -38,9 +17,10 @@ $BODY$;'''
 types = {
     int: 'INTEGER',
     str: 'TEXT',
-    float: 'DOUBLE',
+    float: 'DOUBLE PRECISION',
     bool: 'BOOLEAN',
-    Record: 'RECORD'
+    bytes: 'BYTEA',
+    Decimal: 'NUMERIC'
 }
 
 
@@ -53,14 +33,14 @@ def convertType_(t):
 
 
 def convertType(t):
-    if hasattr(t, '__origin__'):
-        if t.__origin__ == Out:
+    if hasattr(t, '__name__'):
+        if t.__name__ == 'Out':
             return convertType_(t.__args__[0]), 'OUT '
-        elif t.__origin__ == In:
+        elif t.__name__ == 'In':
             return convertType_(t.__args__[0]), 'IN '
-        elif t.__origin__ == InOut:
+        elif t.__name__ == 'InOut':
             return convertType_(t.__args__[0]), 'INOUT '
-        elif t.__origin__ == SetOf:
+        elif t.__name__ == 'SetOf':
             return convertType_(t.__args__[0]), 'SETOF '
     return convertType_(t), ''
 
@@ -95,14 +75,14 @@ def getBody(f):
 
 
 def sql_properties(
-        strict:bool = False, 
-        volatility:Literal['volatile', 'stable', 'immutable'] = None, 
-        parallel:Literal['safe', 'unsafe', 'restricted'] = None, 
-        leakproof:bool = None, 
-        cost:int = None,
-        rows:int = None,
-        transform:List[type]=[],
-        procedure:bool = False):
+        strict: Optional[bool] = None, 
+        volatility: Optional[Literal['volatile', 'stable', 'immutable']] = None, 
+        parallel: Optional[Literal['safe', 'unsafe', 'restricted']] = None, 
+        leakproof: Optional[bool] = None, 
+        cost: Optional[int] = None,
+        rows: Optional[int] = None,
+        transform: List[type]=[],
+        procedure: bool = False):
     properties = []
     if strict == True:
         properties.append('STRICT')
