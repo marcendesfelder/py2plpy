@@ -143,7 +143,7 @@ def transformFunc(f, schema = None):
 
 def transform(path):
     d, file = os.path.split(path)
-    sys.path.insert(1, d)
+    sys.path.insert(0, d)
     name = os.path.splitext(file)[0]
     m = importlib.import_module(name)
 
