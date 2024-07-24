@@ -91,7 +91,7 @@ def sql_properties(
     if volatility:
         properties.append(volatility.upper())
     if parallel:
-        properties.append(parallel.upper())
+        properties.append('PARALLEL '+parallel.upper())
     if leakproof == True:
         properties.append('LEAKPROOF')
     elif leakproof == False:
