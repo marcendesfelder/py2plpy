@@ -79,8 +79,11 @@ def sql_properties(
         volatility: Optional[Literal['volatile', 'stable', 'immutable']] = None, 
         parallel: Optional[Literal['safe', 'unsafe', 'restricted']] = None, 
         leakproof: Optional[bool] = None, 
+        security: Optional[Literal['invoker', 'definer']] = None,
         cost: Optional[int] = None,
         rows: Optional[int] = None,
+        support: Optional[str] = None,
+        set: List[Tuple[str, str]] = [],
         transform: List[type]=[],
         procedure: bool = False):
     properties = []
@@ -96,10 +99,18 @@ def sql_properties(
         properties.append('LEAKPROOF')
     elif leakproof == False:
         properties.append('NOT LEAKPROOF')
+    if security == 'invoker':
+        properties.append('SECURITY INVOKER')
+    elif security == 'definer':
+        properties.append('SECURITY DEFINER')
     if cost is not None:
         properties.append(f'COST {cost}')
     if rows is not None:
         properties.append(f'ROWS {rows}')
+    if support is not None:
+        properties.append(f'SUPPORT {support}')
+    if set:
+        properties.extend(f"SET {t[0]} = '{t[1]}'" for t in set)
     if transform:
         properties.append('TRANSFORM FOR TYPE '+', FOR TYPE '.join([convertType_(t) for t in transform]))
 
